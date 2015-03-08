@@ -78,9 +78,28 @@ public class GameEngine implements KeyListener, GameReporter{
 			}
 		}
 	}
+
+	private void clear(){		
+		Iterator<Enemy> e_iter = enemies.iterator();
+		while(e_iter.hasNext()){
+			Enemy e = e_iter.next();
+			e.proceed();
+			
+			if(e.isAlive()){
+				e_iter.remove();
+				gp.sprites.remove(e);
+			}
+		}
+		score = 0;		
+		v.x = 180;
+		v.y = 550;
+		gp.updateGameUI(this);
+		timer.start();
+	}
 	
 	public void die(){
 		timer.stop();
+		gp.updateGameUI(this,1);
 	}
 	
 	void controlVehicle(KeyEvent e) {
@@ -94,6 +113,25 @@ public class GameEngine implements KeyListener, GameReporter{
 		case KeyEvent.VK_D:
 			difficulty += 0.1;
 			break;
+		case KeyEvent.VK_ESCAPE:
+			System.exit(0);
+			break;
+		}
+	}
+
+	void controlGameover(KeyEvent e) {
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_ESCAPE:
+			System.exit(0);
+			break;
+		case KeyEvent.VK_LEFT:
+		case KeyEvent.VK_RIGHT:
+		case KeyEvent.VK_UP:
+		case KeyEvent.VK_DOWN:
+			break;
+		default:
+			clear();
+			break;
 		}
 	}
 
@@ -103,8 +141,11 @@ public class GameEngine implements KeyListener, GameReporter{
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
-		controlVehicle(e);
-		
+		if(timer.isRunning())
+			controlVehicle(e);
+		else{				
+			controlGameover(e);
+		}
 	}
 
 	@Override
