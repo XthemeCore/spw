@@ -30,10 +30,10 @@ public class GamePanel extends JPanel {
 		
 		big.setColor(Color.WHITE);	
 		big.setFont(big.getFont().deriveFont(16F));
-		big.drawString(String.format("%08d", reporter.getScore()), 290, 20);
-
+		
 		switch (state){
-			case 0:	for(Sprite s : sprites){
+			case 0:	big.drawString(String.format("%08d", reporter.getScore()), 290, 20);
+					for(Sprite s : sprites){
 					s.draw(big);}
 					break;
 			case 1: int tempsize = big.getFont().getSize();
@@ -42,6 +42,8 @@ public class GamePanel extends JPanel {
 					big.setFont(big.getFont().deriveFont((float)tempsize)); 
 					big.drawString("Press Any Key except Arrow key to Restart", 45, 280);
 					big.drawString("or Press ESC to Exit", 120, 300);
+					big.setFont(big.getFont().deriveFont(18F));
+					big.drawString(String.format("Your Score: %d", reporter.getScore()), 120, 360);
 					break;
 		}
 		

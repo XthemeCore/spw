@@ -18,9 +18,13 @@ public class GameEngine implements KeyListener, GameReporter{
 	private SpaceShip v;	
 	
 	private Timer timer;
+	private Timer timer_player;
 	
 	private long score = 0;
 	private double difficulty = 0.1;
+
+	//Keys for Left, Right, Up, Down.
+	private boolean keys[] = {false,false,false,false};
 	
 	public GameEngine(GamePanel gp, SpaceShip v) {
 		this.gp = gp;
@@ -35,18 +39,38 @@ public class GameEngine implements KeyListener, GameReporter{
 				process();
 			}
 		});
+		timer_player = new Timer(10, new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				process_player();	
+			}
+		});
 		timer.setRepeats(true);
-		
+		timer_player.setRepeats(true);
 	}
 	
 	public void start(){
 		timer.start();
+		timer_player.start();
 	}
 	
 	private void generateEnemy(){
-		Enemy e = new Enemy((int)(Math.random()*390), 30);
+		Enemy e = new Enemy((int)(Math.random()*390), 0);
 		gp.sprites.add(e);
 		enemies.add(e);
+	}
+
+	private void process_player(){
+		if(keys[0])
+			v.move(-1,0);
+		else if(keys[1])
+			v.move(1,0);
+
+		if(keys[2])
+			v.move(0,-1);
+		else if(keys[3])
+			v.move(0,1);
 	}
 	
 	private void process(){
@@ -93,22 +117,33 @@ public class GameEngine implements KeyListener, GameReporter{
 		score = 0;		
 		v.x = 180;
 		v.y = 550;
+
 		gp.updateGameUI(this);
+
 		timer.start();
+		timer_player.start();
 	}
 	
 	public void die(){
 		timer.stop();
+		timer_player.stop();
+
 		gp.updateGameUI(this,1);
 	}
 	
-	void controlVehicle(KeyEvent e) {
+	void onPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_LEFT:
-			v.move(-1);
+			keys[0] = true;
 			break;
 		case KeyEvent.VK_RIGHT:
-			v.move(1);
+			keys[1] = true;
+			break;
+		case KeyEvent.VK_UP:
+			keys[2] = true;
+			break;
+		case KeyEvent.VK_DOWN:
+			keys[3] = true;
 			break;
 		case KeyEvent.VK_D:
 			difficulty += 0.1;
@@ -119,7 +154,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		}
 	}
 
-	void controlGameover(KeyEvent e) {
+	void onStop(KeyEvent e) {
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_ESCAPE:
 			System.exit(0);
@@ -135,6 +170,23 @@ public class GameEngine implements KeyListener, GameReporter{
 		}
 	}
 
+	void onReleased(KeyEvent e) {
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_LEFT:
+			keys[0] = false;
+			break;
+		case KeyEvent.VK_RIGHT:
+			keys[1] = false;
+			break;
+		case KeyEvent.VK_UP:
+			keys[2] = false;
+			break;
+		case KeyEvent.VK_DOWN:
+			keys[3] = false;
+			break;
+		}
+	}
+
 	public long getScore(){
 		return score;
 	}
@@ -142,15 +194,15 @@ public class GameEngine implements KeyListener, GameReporter{
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if(timer.isRunning())
-			controlVehicle(e);
+			onPressed(e);
 		else{				
-			controlGameover(e);
+			onStop(e);
 		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		//do nothing
+		onReleased(e);
 	}
 
 	@Override
