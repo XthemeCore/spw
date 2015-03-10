@@ -15,16 +15,18 @@ public class GameEngine implements KeyListener, GameReporter{
 	GamePanel gp;
 		
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy>();	
+	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 	private SpaceShip v;	
 	
 	private Timer timer;
 	private Timer timer_player;
+	private Timer timer_bullet;
 	
 	private long score = 0;
 	private double difficulty = 0.1;
 
-	//Keys for Left, Right, Up, Down.
-	private boolean keys[] = {false,false,false,false};
+	//Keys for Left, Right, Up, Down, Spacebar.
+	private boolean keys[] = {false,false,false,false,false};
 	
 	public GameEngine(GamePanel gp, SpaceShip v) {
 		this.gp = gp;
@@ -46,8 +48,15 @@ public class GameEngine implements KeyListener, GameReporter{
 				process_player();	
 			}
 		});
+		timer_bullet = new Timer(150, new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				generateBullet();	
+			}
+		});
 		timer.setRepeats(true);
 		timer_player.setRepeats(true);
+		timer_bullet.setRepeats(true);
 	}
 	
 	public void start(){
@@ -61,6 +70,12 @@ public class GameEngine implements KeyListener, GameReporter{
 		enemies.add(e);
 	}
 
+	private void generateBullet(){
+		Bullet b = new Bullet(v.x + (v.width/2) - 2, v.y);
+		gp.sprites.add(b);
+		bullets.add(b);
+	}
+
 	private void process_player(){
 		if(keys[0])
 			v.move(-1,0);
@@ -71,6 +86,12 @@ public class GameEngine implements KeyListener, GameReporter{
 			v.move(0,-1);
 		else if(keys[3])
 			v.move(0,1);
+
+		if(keys[4]){
+			timer_bullet.start();
+		}else{			
+			timer_bullet.stop();
+		}
 	}
 	
 	private void process(){
@@ -83,10 +104,20 @@ public class GameEngine implements KeyListener, GameReporter{
 			Enemy e = e_iter.next();
 			e.proceed();
 			
-			if(!e.isAlive()){
+			if(e.y >= e.Y_TO_DIE){
 				e_iter.remove();
 				gp.sprites.remove(e);
-				score += 100;
+			}
+		}
+
+		Iterator<Bullet> b_iter = bullets.iterator();
+		while(b_iter.hasNext()){
+			Bullet b = b_iter.next();
+			b.proceed();
+			
+			if(!b.isAlive()){
+				b_iter.remove();
+				gp.sprites.remove(b);
 			}
 		}
 		
@@ -94,11 +125,20 @@ public class GameEngine implements KeyListener, GameReporter{
 		
 		Rectangle2D.Double vr = v.getRectangle();
 		Rectangle2D.Double er;
+		Rectangle2D.Double br;
 		for(Enemy e : enemies){
 			er = e.getRectangle();
-			if(er.intersects(vr)){
+			if(er.intersects(vr) && e.isAlive()){				
 				die();
 				return;
+			}
+			for(Bullet b : bullets){
+				br = b.getRectangle();
+				if(br.intersects(er) && e.isAlive()){
+						e.setAlive(false);
+						b.setAlive(false);
+						score+= 100;
+				}
 			}
 		}
 	}
@@ -109,11 +149,22 @@ public class GameEngine implements KeyListener, GameReporter{
 			Enemy e = e_iter.next();
 			e.proceed();
 			
-			if(e.isAlive()){
+			if(e.isAlive() || e.y < e.Y_TO_DIE){
 				e_iter.remove();
 				gp.sprites.remove(e);
 			}
 		}
+		Iterator<Bullet> b_iter = bullets.iterator();
+		while(b_iter.hasNext()){
+			Bullet b = b_iter.next();
+			b.proceed();
+			
+			if(b.isAlive()){
+				b_iter.remove();
+				gp.sprites.remove(b);
+			}
+		}
+		v.setAlive(true);
 		score = 0;		
 		v.x = 180;
 		v.y = 550;
@@ -125,8 +176,12 @@ public class GameEngine implements KeyListener, GameReporter{
 	}
 	
 	public void die(){
+		v.setAlive(false);
+		difficulty = 0.1;
+
 		timer.stop();
 		timer_player.stop();
+		timer_bullet.stop();
 
 		gp.updateGameUI(this,1);
 	}
@@ -134,18 +189,26 @@ public class GameEngine implements KeyListener, GameReporter{
 	void onPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_LEFT:
+		case KeyEvent.VK_A:
 			keys[0] = true;
 			break;
 		case KeyEvent.VK_RIGHT:
+		case KeyEvent.VK_D:
 			keys[1] = true;
 			break;
 		case KeyEvent.VK_UP:
+		case KeyEvent.VK_W:
 			keys[2] = true;
 			break;
 		case KeyEvent.VK_DOWN:
+		case KeyEvent.VK_S:
 			keys[3] = true;
 			break;
-		case KeyEvent.VK_D:
+		case KeyEvent.VK_SPACE:
+		case KeyEvent.VK_ENTER:
+			keys[4] = true;
+			break;
+		case KeyEvent.VK_C:
 			difficulty += 0.1;
 			break;
 		case KeyEvent.VK_ESCAPE:
@@ -173,16 +236,24 @@ public class GameEngine implements KeyListener, GameReporter{
 	void onReleased(KeyEvent e) {
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_LEFT:
+		case KeyEvent.VK_A:
 			keys[0] = false;
 			break;
 		case KeyEvent.VK_RIGHT:
+		case KeyEvent.VK_D:
 			keys[1] = false;
 			break;
 		case KeyEvent.VK_UP:
+		case KeyEvent.VK_W:
 			keys[2] = false;
 			break;
 		case KeyEvent.VK_DOWN:
+		case KeyEvent.VK_S:
 			keys[3] = false;
+			break;
+		case KeyEvent.VK_SPACE:
+		case KeyEvent.VK_ENTER:
+			keys[4] = false;
 			break;
 		}
 	}

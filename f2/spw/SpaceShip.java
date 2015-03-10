@@ -7,6 +7,7 @@ import java.awt.Graphics;
 public class SpaceShip extends Sprite{
 
 	int step = 1;
+	private boolean alive = true;
 	
 	public SpaceShip(int x, int y, int width, int height) {
 		super(x, y, width, height);
@@ -15,7 +16,10 @@ public class SpaceShip extends Sprite{
 
 	@Override
 	public void draw(Graphics2D g) {
-		g.drawImage(sprites[0], x, y, width , height, null);		
+		if(isAlive())
+			g.drawImage(sprites[0], x, y, width , height, null);
+		else
+			g.drawImage(sprites[2], x, y, width , height, null);		
 	}
 
 	public void move(int dx,int dy){
@@ -31,4 +35,11 @@ public class SpaceShip extends Sprite{
 			y = 650 - height;
 	}
 
+	public boolean isAlive(){
+		return alive;
+	}
+
+	public void setAlive(boolean alive){
+		this.alive = alive;
+	}
 }

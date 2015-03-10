@@ -6,6 +6,13 @@ XthemeCore
 
 # Update
 
+## 0.1.3
+- Add bullet with can be shoot by press [SPACEBAR] or [ENTER] with player and enemy dealth sprite (BOOM!)
+- No more score for survive through the enemy. Only shoot them to get 100 score!
+- Player can also move with [W], [A], [S] and [D], and Change Difficulty key be replaced with [C]
+- Add Background Scrolling
+- Avoid known bug in ver 0.1.1 and still not fixed
+
 ## 0.1.2
 - 8-Directions Smooth Movement by add player timer to process move method in GameEngine class and replace move method with keys boolean.
 - Improve move method in SpaceShip class to allow vertical move.

@@ -6,7 +6,7 @@ import java.awt.geom.Rectangle2D.Double;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
-import java.io.File;
+import java.io.InputStream;
 
 public abstract class Sprite {
 	int x;
@@ -19,7 +19,7 @@ public abstract class Sprite {
 	BufferedImage[] sprites;
 	
 	public Sprite(int x, int y, int width, int height) {
-		this(x,y,width,height,1,2,"sprite.png");
+		this(x,y,width,height,1,4,"sprite.png");
 	}
 
 	public Sprite(int x, int y, int width, int height,int row,int column,String src) {
@@ -29,8 +29,8 @@ public abstract class Sprite {
 		this.height = height;
 		sprites = new BufferedImage[row * column];
 		try{
-            File file = new File("f2/spw/Graphics/" + src);
-            image = ImageIO.read(file);
+			InputStream stream = getClass().getResourceAsStream("/f2/spw/Graphics/" + src);
+            image = ImageIO.read(stream);
 
         }
         catch (IOException e){
