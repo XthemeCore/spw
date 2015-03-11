@@ -6,6 +6,14 @@ XthemeCore
 
 # Update
 
+## 0.1.4
+- Add Title screen, Stage Up screen, Game Win screen and improve Game Over screen with new design
+- Replaced shoot button form [ENTER] to [SHIFT] and use [ENTER] button as select button
+- Add stage 1 to 10 with score achieve from 1,000 to 99,999,999!!!
+- Every stage score per shot can be calculate by using this formula: 100 x 2^(stage - 1)
+- Fix player position which can go out of screen in ver 0.1.3
+- Avoid known bug in ver 0.1.1 and still not fixed
+
 ## 0.1.3
 - Add bullet with can be shoot by press [SPACEBAR] or [ENTER] with player and enemy dealth sprite (BOOM!)
 - No more score for survive through the enemy. Only shoot them to get 100 score!

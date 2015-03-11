@@ -23,15 +23,18 @@ public class GameEngine implements KeyListener, GameReporter{
 	private Timer timer_bullet;
 	
 	private long score = 0;
-	private double difficulty = 0.1;
+	private int stage;
+	private double difficulty;
+	public static int maxstage = 10;
 
 	//Keys for Left, Right, Up, Down, Spacebar.
 	private boolean keys[] = {false,false,false,false,false};
+	private boolean events[] = {true,false,false};
 	
 	public GameEngine(GamePanel gp, SpaceShip v) {
 		this.gp = gp;
-		this.v = v;		
-		
+		this.v = v;
+
 		gp.sprites.add(v);
 		
 		timer = new Timer(50, new ActionListener() {
@@ -39,8 +42,12 @@ public class GameEngine implements KeyListener, GameReporter{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				process();
+				stageUp();
+				win();
+				isTitle();
 			}
 		});
+
 		timer_player = new Timer(10, new ActionListener() {
 			
 			@Override
@@ -65,7 +72,7 @@ public class GameEngine implements KeyListener, GameReporter{
 	}
 	
 	private void generateEnemy(){
-		Enemy e = new Enemy((int)(Math.random()*390), 0);
+		Enemy e = new Enemy((int)(Math.random()*366), 0);
 		gp.sprites.add(e);
 		enemies.add(e);
 	}
@@ -93,11 +100,32 @@ public class GameEngine implements KeyListener, GameReporter{
 			timer_bullet.stop();
 		}
 	}
+
+	private void process_compare(){
+		if(score >= 99999999){
+			events[2] = true;
+		}
+		else {
+			switch(stage){
+				case 1:	calStage(1,1000);
+				case 2:	calStage(2,5000);
+				case 3:	calStage(3,10000);
+				case 4:	calStage(4,50000);
+				case 5:	calStage(5,100000);
+				case 6:	calStage(6,500000);
+				case 7:	calStage(7,1000000);
+				case 8:	calStage(8,5000000);
+				case 9:	calStage(9,10000000);
+			}
+		}
+	}
 	
 	private void process(){
 		if(Math.random() < difficulty){
 			generateEnemy();
 		}
+
+		process_compare();
 		
 		Iterator<Enemy> e_iter = enemies.iterator();
 		while(e_iter.hasNext()){
@@ -137,13 +165,53 @@ public class GameEngine implements KeyListener, GameReporter{
 				if(br.intersects(er) && e.isAlive()){
 						e.setAlive(false);
 						b.setAlive(false);
-						score+= 100;
+						score+= 100 * Math.pow(2,stage - 1);
 				}
 			}
 		}
 	}
 
-	private void clear(){		
+	private void stageUp(){		
+		if(events[1]){
+			if(stage < maxstage)
+				setStage(++stage);
+
+			Iterator<Enemy> e_iter = enemies.iterator();
+			while(e_iter.hasNext()){
+				Enemy e = e_iter.next();
+			
+				if(e.isAlive()){
+					e.setAlive(false);
+				}
+			}
+
+			timer.stop();
+			timer_player.stop();
+			timer_bullet.stop();
+		
+			gp.updateGameUI(this,3);
+		}
+	}
+
+	private void startScreen(){
+		events[0] = false;
+		gp.updateGameUI(this);
+		resetGame();
+		timer.start();
+		timer_player.start();
+	}
+
+	private void continueScreen(){
+		events[1] = false;
+		gp.updateGameUI(this);
+		timer.start();
+		timer_player.start();
+		timer_bullet.start();
+	}
+
+	private void clearScreen(){
+		if(events[2])
+			events[2] = false;
 		Iterator<Enemy> e_iter = enemies.iterator();
 		while(e_iter.hasNext()){
 			Enemy e = e_iter.next();
@@ -165,28 +233,72 @@ public class GameEngine implements KeyListener, GameReporter{
 			}
 		}
 		v.setAlive(true);
-		score = 0;		
-		v.x = 180;
-		v.y = 550;
+		v.setToOrigin();
+		events[0] = true;
 
 		gp.updateGameUI(this);
 
 		timer.start();
 		timer_player.start();
 	}
-	
-	public void die(){
-		v.setAlive(false);
-		difficulty = 0.1;
 
+	private void resetGame(){
+		setStage(0);
+		score = 0;
+		events[1] = true;
+	}
+
+	private void isTitle(){
+		if(events[0]){
+			gp.updateGameUI(this,0);
+
+			timer.stop();
+			timer_player.stop();
+		}
+	}
+	
+	private void win(){
+		if(events[2]){
+			Iterator<Enemy> e_iter = enemies.iterator();
+			while(e_iter.hasNext()){
+				Enemy e = e_iter.next();
+			
+				if(e.isAlive()){
+					e.setAlive(false);
+				}
+			}
+
+			timer.stop();
+			timer_player.stop();
+			timer_bullet.stop();
+
+			gp.updateGameUI(this,4);
+		}
+	}
+
+	private void die(){
+		v.setAlive(false);
+		setStage(1);
+		
 		timer.stop();
 		timer_player.stop();
 		timer_bullet.stop();
 
-		gp.updateGameUI(this,1);
+		gp.updateGameUI(this,2);
+	}
+
+	private void setStage(int stage){
+		this.stage = stage;
+		difficulty = 0.1 * stage;
+	}
+
+	private void calStage(int stage,long stagescore){
+		if(score >= stagescore){
+			events[1] = true;
+		}
 	}
 	
-	void onPressed(KeyEvent e) {
+	private void onPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_LEFT:
 		case KeyEvent.VK_A:
@@ -205,11 +317,11 @@ public class GameEngine implements KeyListener, GameReporter{
 			keys[3] = true;
 			break;
 		case KeyEvent.VK_SPACE:
-		case KeyEvent.VK_ENTER:
+		case KeyEvent.VK_SHIFT:
 			keys[4] = true;
 			break;
 		case KeyEvent.VK_C:
-			difficulty += 0.1;
+			events[1] = true;
 			break;
 		case KeyEvent.VK_ESCAPE:
 			System.exit(0);
@@ -217,23 +329,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		}
 	}
 
-	void onStop(KeyEvent e) {
-		switch (e.getKeyCode()) {
-		case KeyEvent.VK_ESCAPE:
-			System.exit(0);
-			break;
-		case KeyEvent.VK_LEFT:
-		case KeyEvent.VK_RIGHT:
-		case KeyEvent.VK_UP:
-		case KeyEvent.VK_DOWN:
-			break;
-		default:
-			clear();
-			break;
-		}
-	}
-
-	void onReleased(KeyEvent e) {
+	private void onReleased(KeyEvent e) {
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_LEFT:
 		case KeyEvent.VK_A:
@@ -252,7 +348,7 @@ public class GameEngine implements KeyListener, GameReporter{
 			keys[3] = false;
 			break;
 		case KeyEvent.VK_SPACE:
-		case KeyEvent.VK_ENTER:
+		case KeyEvent.VK_SHIFT:
 			keys[4] = false;
 			break;
 		}
@@ -261,13 +357,28 @@ public class GameEngine implements KeyListener, GameReporter{
 	public long getScore(){
 		return score;
 	}
+
+	public int getStage(){
+		return stage;
+	}
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if(timer.isRunning())
 			onPressed(e);
-		else{				
-			onStop(e);
+		else if(e.getKeyCode() == KeyEvent.VK_ENTER){
+			if(events[0]){				
+				startScreen();
+			}
+			else if(events[1]){				
+				continueScreen();
+			}
+			else if(events[2]){				
+				clearScreen();
+			}
+			else{
+				clearScreen();
+			}
 		}
 	}
 

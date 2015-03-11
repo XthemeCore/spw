@@ -27,12 +27,12 @@ public class SpaceShip extends Sprite{
 		y += (step * dy);
 		if(x < 0)
 			x = 0;
-		if(x > 400 - width)
-			x = 400 - width;
+		if(x > 384 - width)
+			x = 384 - width;
 		if(y < 0)
 			y = 0;
-		if(y > 650 - height)
-			y = 650 - height;
+		if(y > 612 - height)
+			y = 612 - height;
 	}
 
 	public boolean isAlive(){
@@ -41,5 +41,10 @@ public class SpaceShip extends Sprite{
 
 	public void setAlive(boolean alive){
 		this.alive = alive;
+	}
+
+	public void setToOrigin(){
+		x = 180;
+		y = 550;
 	}
 }
