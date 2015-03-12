@@ -16,7 +16,11 @@ public class GameEngine implements KeyListener, GameReporter{
 		
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy>();	
 	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
-	private SpaceShip v;	
+	private SpaceShip v;
+	private Audio shot;
+	private Audio explode;
+	private Audio start;
+	private Audio sample;
 	
 	private Timer timer;
 	private Timer timer_player;
@@ -34,6 +38,10 @@ public class GameEngine implements KeyListener, GameReporter{
 	public GameEngine(GamePanel gp, SpaceShip v) {
 		this.gp = gp;
 		this.v = v;
+		sample = new Audio("sample.mid");
+		shot = new Audio("gunshot.mid");
+		explode = new Audio("explode.mid");
+		start = new Audio("start.mid");
 
 		gp.sprites.add(v);
 		
@@ -58,7 +66,8 @@ public class GameEngine implements KeyListener, GameReporter{
 		timer_bullet = new Timer(150, new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				generateBullet();	
+				shot.start();
+				generateBullet();
 			}
 		});
 		timer.setRepeats(true);
@@ -163,6 +172,7 @@ public class GameEngine implements KeyListener, GameReporter{
 			for(Bullet b : bullets){
 				br = b.getRectangle();
 				if(br.intersects(er) && e.isAlive()){
+						explode.start();
 						e.setAlive(false);
 						b.setAlive(false);
 						score+= 100 * Math.pow(2,stage - 1);
@@ -173,6 +183,9 @@ public class GameEngine implements KeyListener, GameReporter{
 
 	private void stageUp(){		
 		if(events[1]){
+			if(stage > 0)
+				sample.pause();
+				start.start();
 			if(stage < maxstage)
 				setStage(++stage);
 
@@ -202,6 +215,7 @@ public class GameEngine implements KeyListener, GameReporter{
 	}
 
 	private void continueScreen(){
+		sample.play();
 		events[1] = false;
 		gp.updateGameUI(this);
 		timer.start();
@@ -250,6 +264,10 @@ public class GameEngine implements KeyListener, GameReporter{
 
 	private void isTitle(){
 		if(events[0]){
+			if(sample.isPlaying())
+				sample.play();
+			else
+				sample.start();
 			gp.updateGameUI(this,0);
 
 			timer.stop();
@@ -371,6 +389,7 @@ public class GameEngine implements KeyListener, GameReporter{
 				startScreen();
 			}
 			else if(events[1]){				
+				
 				continueScreen();
 			}
 			else if(events[2]){				
