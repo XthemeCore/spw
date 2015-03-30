@@ -17,6 +17,8 @@ public class GameEngine implements KeyListener, GameReporter{
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy>();	
 	private SpaceShip v;	
 	
+	private Audio bgm;
+
 	private Timer timer;
 	
 	private long score = 0;
@@ -24,7 +26,9 @@ public class GameEngine implements KeyListener, GameReporter{
 	
 	public GameEngine(GamePanel gp, SpaceShip v) {
 		this.gp = gp;
-		this.v = v;		
+		this.v = v;	
+		bgm = new Audio("sample.mid");
+		bgm.play(true);
 		
 		gp.sprites.add(v);
 		
@@ -67,6 +71,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		}
 		
 		gp.updateGameUI(this);
+		bgm.updatePlay();
 		
 		Rectangle2D.Double vr = v.getRectangle();
 		Rectangle2D.Double er;

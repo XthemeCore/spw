@@ -12,7 +12,7 @@ public class Enemy extends Sprite{
 	private boolean alive = true;
 	
 	public Enemy(int x, int y) {
-		super(x, y, 5, 10);
+		super(x, y, 32, 32);
 		
 	}
 
@@ -24,9 +24,7 @@ public class Enemy extends Sprite{
 			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 
 					(float)(Y_TO_DIE - y)/(Y_TO_DIE - Y_TO_FADE)));
 		}
-		g.setColor(Color.RED);
-		g.fillRect(x, y, width, height);
-		
+		g.drawImage(sprites[1], x, y, width , height, null);		
 	}
 
 	public void proceed(){
