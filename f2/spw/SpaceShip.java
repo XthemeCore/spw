@@ -2,12 +2,10 @@ package f2.spw;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Graphics;
 
 public class SpaceShip extends Sprite{
 
-	int step = 1;
-	private boolean alive = true;
+	int step = 8;
 	
 	public SpaceShip(int x, int y, int width, int height) {
 		super(x, y, width, height);
@@ -16,35 +14,17 @@ public class SpaceShip extends Sprite{
 
 	@Override
 	public void draw(Graphics2D g) {
-		if(isAlive())
-			g.drawImage(sprites[0], x, y, width , height, null);
-		else
-			g.drawImage(sprites[2], x, y, width , height, null);		
+		g.setColor(Color.GREEN);
+		g.fillRect(x, y, width, height);
+		
 	}
 
-	public void move(int dx,int dy){
-		x += (step * dx);
-		y += (step * dy);
+	public void move(int direction){
+		x += (step * direction);
 		if(x < 0)
 			x = 0;
-		if(x > 384 - width)
-			x = 384 - width;
-		if(y < 0)
-			y = 0;
-		if(y > 612 - height)
-			y = 612 - height;
+		if(x > 400 - width)
+			x = 400 - width;
 	}
 
-	public boolean isAlive(){
-		return alive;
-	}
-
-	public void setAlive(boolean alive){
-		this.alive = alive;
-	}
-
-	public void setToOrigin(){
-		x = 180;
-		y = 550;
-	}
 }
