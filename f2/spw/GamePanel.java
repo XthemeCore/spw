@@ -14,14 +14,19 @@ public class GamePanel extends JPanel {
 	Graphics2D big;
 	ArrayList<Sprite> sprites = new ArrayList<Sprite>();
 
+	private int gpanelWidth;
+	private int gpanelHeight;
+
 	public GamePanel() {
-		bi = new BufferedImage(400, 600, BufferedImage.TYPE_INT_ARGB);
+		gpanelWidth = 400;
+		gpanelHeight = 600;
+		bi = new BufferedImage(gpanelWidth, gpanelHeight, BufferedImage.TYPE_INT_ARGB);
 		big = (Graphics2D) bi.getGraphics();
 		big.setBackground(Color.BLACK);
 	}
 
 	public void updateGameUI(GameReporter reporter){
-		big.clearRect(0, 0, 400, 600);
+		big.clearRect(0, 0, gpanelWidth, gpanelHeight);
 		
 		big.setColor(Color.WHITE);		
 		big.drawString(String.format("%08d", reporter.getScore()), 300, 20);
