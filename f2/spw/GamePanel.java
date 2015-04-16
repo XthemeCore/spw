@@ -40,10 +40,11 @@ public class GamePanel extends JPanel {
 	}
 
 	public void updateGameUI(GameReporter reporter){
-		big.clearRect(0, 0, gpanelWidth, gpanelHeight);
+		big.clearRect(0,0, gpanelWidth, gpanelHeight);
 		updateBackground();
 		big.setColor(Color.WHITE);		
 		big.drawString(String.format("%08d", reporter.getScore()), 300, 20);
+		big.drawString("Press ESC to exit", 300, 40);
 		for(Sprite s : sprites){
 			s.draw(big);
 		}
@@ -63,7 +64,6 @@ public class GamePanel extends JPanel {
 	@Override
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
-		g2d.drawImage(bi, null, 0, 0);
+		g2d.drawImage(bi, null, (Main.screenWidth-gpanelWidth)/2, (Main.screenHeight-gpanelHeight)/2);
 	}
-
 }

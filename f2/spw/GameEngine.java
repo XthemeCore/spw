@@ -21,6 +21,8 @@ public class GameEngine implements KeyListener, GameReporter{
 	private Audio bgm;
 
 	private Timer timer;
+	Counter c;
+	private int maxTime = 50;
 	
 	private long score = 0;
 	private double difficulty = 0.1;
@@ -29,13 +31,14 @@ public class GameEngine implements KeyListener, GameReporter{
 	
 	public GameEngine(GamePanel gp, SpaceShip v) {
 		this.gp = gp;
-		this.v = v;	
+		this.v = v;
 		bgm = new Audio("sample.mid");
 		bgm.play(true);
 		
 		gp.sprites.add(v);
 		
-		timer = new Timer(50, new ActionListener() {
+		c = new Counter();
+		timer = new Timer(maxTime, new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -71,11 +74,16 @@ public class GameEngine implements KeyListener, GameReporter{
 			v.move(3);
 		else if(keys[3])
 			v.move(2);
-		if(keys[4])
-			generateBullet();
+		if(keys[4]){
+			if(c.getCount()%4 == 0)
+				generateBullet();}
 	}
 	
 	private void process(){
+		if(c.getCount() < maxTime)
+			c.count();
+		else
+			c.reset();
 		checkMove();
 		if(Math.random() < difficulty){
 			generateEnemy();
@@ -150,6 +158,9 @@ public class GameEngine implements KeyListener, GameReporter{
 			break;
 		case KeyEvent.VK_SPACE:
 			keys[4] = true;
+			break;
+		case KeyEvent.VK_ESCAPE:
+			System.exit(0);
 			break;
 		case KeyEvent.VK_D:
 			difficulty += 0.1;
