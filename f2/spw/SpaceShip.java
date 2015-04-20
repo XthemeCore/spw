@@ -3,18 +3,21 @@ package f2.spw;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-public class SpaceShip extends Sprite{
+public class SpaceShip extends Sprite {
 
 	int step = 8;
+	private boolean alive = true;
 	
 	public SpaceShip(int x, int y, int width, int height) {
-		super(x, y, width, height);
-		
+		super(x, y, width, height);		
 	}
 
 	@Override
 	public void draw(Graphics2D g) {
-		g.drawImage(sprites[0], x, y, width , height, null);		
+		if(isAlive())
+			g.drawImage(sprites[0], x, y, width , height, null);
+		else
+			g.drawImage(sprites[2], x, y, width , height, null);		
 	}
 
 	public void move(int direction){
@@ -38,4 +41,16 @@ public class SpaceShip extends Sprite{
 			y = 612 - height;
 	}
 
+	public boolean isAlive(){
+		return alive;
+	}
+
+	public void setAlive(boolean alive){
+		this.alive = alive;
+	}
+
+	public void setToOrigin(){
+		x = 180;
+		y = 550;
+	}
 }

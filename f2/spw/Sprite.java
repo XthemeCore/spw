@@ -40,7 +40,8 @@ public abstract class Sprite {
 		int imageHeight = image.getHeight()/row;
 		for (int i = 0; i < row; i++) {
 			for (int j = 0; j < column; j++) {
-				sprites[(i * column) + j] = image.getSubimage(j * imageWidth, i * imageHeight, imageWidth, imageHeight);
+				sprites[(i * column) + j] = image.getSubimage(j * imageWidth,
+					i * imageHeight, imageWidth, imageHeight);
 			}
 		}
 	}

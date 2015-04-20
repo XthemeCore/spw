@@ -19,21 +19,27 @@ public class GameEngine implements KeyListener, GameReporter{
 	private SpaceShip v;	
 	
 	private Audio bgm;
+	private Audio shotSE;
+	private Audio explodeSE;
 
 	private Timer timer;
 	Counter c;
 	private int maxTime = 50;
 	
 	private long score = 0;
-	private double difficulty = 0.1;
+	private double difficulty;
+	private int stage;
+	public static int maxstage = 10;
 
-	private boolean[] keys = {false,false,false,false,false}; 
+	private boolean[] keys = {false,false,false,false,false};
+	private boolean events[] = {true,false,false,false};
 	
 	public GameEngine(GamePanel gp, SpaceShip v) {
 		this.gp = gp;
 		this.v = v;
 		bgm = new Audio("sample.mid");
-		bgm.play(true);
+		shotSE = new Audio("gunshot.mid");
+		explodeSE = new Audio("explode.mid");
 		
 		gp.sprites.add(v);
 		
@@ -48,7 +54,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		timer.setRepeats(true);
 		
 	}
-	
+
 	public void start(){
 		timer.start();
 	}
@@ -65,7 +71,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		bullets.add(b);
 	}
 
-	private void checkMove(){
+	private void keyCompare(){
 		if(keys[0])
 			v.move(1);
 		else if(keys[1])
@@ -74,9 +80,11 @@ public class GameEngine implements KeyListener, GameReporter{
 			v.move(3);
 		else if(keys[3])
 			v.move(2);
-		if(keys[4]){
-			if(c.getCount()%4 == 0)
-				generateBullet();}
+		if(keys[4])
+			if(c.getCount()%4 == 0){
+				shotSE.start();
+				generateBullet();
+			}
 	}
 	
 	private void process(){
@@ -84,10 +92,14 @@ public class GameEngine implements KeyListener, GameReporter{
 			c.count();
 		else
 			c.reset();
-		checkMove();
+		
 		if(Math.random() < difficulty){
 			generateEnemy();
 		}
+
+		scoreProcess();
+		keyCompare();
+		eventsProcess();
 		
 		Iterator<Enemy> e_iter = enemies.iterator();
 		Iterator<Bullet> b_iter = bullets.iterator();
@@ -110,9 +122,6 @@ public class GameEngine implements KeyListener, GameReporter{
 			}
 		}
 		
-		gp.updateGameUI(this);
-		bgm.updatePlay();
-		
 		Rectangle2D.Double vr = v.getRectangle();
 		Rectangle2D.Double er;
 		Rectangle2D.Double br;
@@ -126,19 +135,155 @@ public class GameEngine implements KeyListener, GameReporter{
 				for(Bullet b : bullets){
 					br = b.getRectangle();
 					if(br.intersects(er) && b.isAlive() && e.isAlive()){
-							gp.sprites.remove(b);
-							gp.sprites.remove(e);
+							explodeSE.start();
 							e.setAlive(false);
 							b.setAlive(false);
-							score+= 100;
+							score+= 100 * Math.pow(2,stage - 1);
 					}
 				}
 			}
 		}
 	}
+
+	private void scoreProcess(){
+		if(score >= 99999999){
+			events[2] = true;
+		}
+		else {
+			switch(stage){
+				case 1:	scoreCompare(1,1000);
+				case 2:	scoreCompare(2,5000);
+				case 3:	scoreCompare(3,10000);
+				case 4:	scoreCompare(4,50000);
+				case 5:	scoreCompare(5,100000);
+				case 6: scoreCompare(6,500000);
+				case 7:	scoreCompare(7,1000000);
+				case 8:	scoreCompare(8,5000000);
+				case 9:	scoreCompare(9,10000000);
+			}
+		}
+	}
+
+	public void eventsProcess(){
+		if(events[0])
+			toTitle();
+		else if(events[1])
+			stageUp();
+		else if(events[3])
+			pauseGame();
+		else{		
+			gp.updateGameUI(this);
+			if(!bgm.isPlaying())
+				bgm.start();
+		}
+	}
+
+	private void stageUp(){
+			if(stage > 0)
+				bgm.pause();
+			if(stage < maxstage)
+				setStage(++stage);
+
+			Iterator<Enemy> e_iter = enemies.iterator();
+			while(e_iter.hasNext()){
+				Enemy e = e_iter.next();
+			
+				if(e.isAlive()){
+					e.setAlive(false);
+				}
+			}
+
+			timer.stop();
+		
+			gp.updateGameUI(this,3);
+	}
+
+	private void pauseGame(){
+			bgm.pause();
+			timer.stop();		
+			gp.updateGameUI(this,5);
+	}
+
+	private void startGame(){
+		events[0] = false;
+		gp.updateGameUI(this);
+		resetGame();
+		bgm.play();
+		timer.start();
+	}
+
+	private void continueGame(){
+		bgm.play();
+		events[1] = false;
+		events[3] = false;
+		gp.updateGameUI(this);
+		timer.start();
+	}
+
+	private void clearGame(){
+		if(events[2])
+			events[2] = false;
+		Iterator<Enemy> e_iter = enemies.iterator();
+		while(e_iter.hasNext()){
+			Enemy e = e_iter.next();
+			e.proceed();
+			
+			if(e.isAlive() || e.y < e.Y_TO_DIE){
+				e_iter.remove();
+				gp.sprites.remove(e);
+			}
+		}
+		Iterator<Bullet> b_iter = bullets.iterator();
+		while(b_iter.hasNext()){
+			Bullet b = b_iter.next();
+			b.proceed();
+			
+			if(b.isAlive()){
+				b_iter.remove();
+				gp.sprites.remove(b);
+			}
+		}
+		v.setAlive(true);
+		v.setToOrigin();
+		events[0] = true;
+
+		gp.updateGameUI(this);
+
+		timer.start();
+	}
+
+	private void resetGame(){
+		setStage(0);
+		score = 0;
+		events[1] = true;
+	}
+
+	public void toTitle(){
+		bgm.start();		
+		gp.updateGameUI(this,1);
+		timer.stop();
+	}
+
+	private void win(){
+			Iterator<Enemy> e_iter = enemies.iterator();
+			while(e_iter.hasNext()){
+				Enemy e = e_iter.next();
+			
+				if(e.isAlive()){
+					e.setAlive(false);
+				}
+			}
+
+			timer.stop();
+			gp.updateGameUI(this,4);
+	}
 	
 	public void die(){
+		v.setAlive(false);
+		setStage(1);
 		timer.stop();
+
+		gp.updateGameUI(this,2);
 
 	}
 	
@@ -160,7 +305,7 @@ public class GameEngine implements KeyListener, GameReporter{
 			keys[4] = true;
 			break;
 		case KeyEvent.VK_ESCAPE:
-			System.exit(0);
+			events[3] = true;
 			break;
 		case KeyEvent.VK_D:
 			difficulty += 0.1;
@@ -171,11 +316,41 @@ public class GameEngine implements KeyListener, GameReporter{
 	public long getScore(){
 		return score;
 	}
+
+	public int getStage(){
+		return stage;
+	}
+
+	private void scoreCompare(int stage,long stagescore){
+		if(score >= stagescore){
+			events[1] = true;
+		}
+	}
+
+	private void setStage(int stage){
+		this.stage = stage;
+		difficulty = 0.1 * stage;
+	}
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
-		controlVehicle(e);
-		
+		if(timer.isRunning())
+			controlVehicle(e);
+		else if(e.getKeyCode() == KeyEvent.VK_ENTER){
+			if(events[0]){				
+				startGame();
+			}
+			else if(events[1] || events[3]){						
+				continueGame();
+			}
+			else if(events[2]){				
+				clearGame();
+			}
+			else
+				clearGame();
+		}
+		else if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
+			System.exit(0);
 	}
 
 	@Override
