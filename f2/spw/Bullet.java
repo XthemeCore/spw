@@ -4,12 +4,11 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-public class Bullet extends Sprite{
+public class Bullet extends LivingEntity{
 	public static final int Y_TO_DIE = 0;
 	
 	private int step = 16;
-	private boolean alive = true;
-	
+
 	public Bullet(int x, int y) {
 		super(x, y, 6, 16,1,2,"bullet.png");
 	}
@@ -24,13 +23,5 @@ public class Bullet extends Sprite{
 		if(y < Y_TO_DIE){
 			alive = false;
 		}
-	}
-	
-	public boolean isAlive(){
-		return alive;
-	}
-
-	public void setAlive(boolean alive){
-		this.alive = alive;
 	}
 }

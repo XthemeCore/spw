@@ -27,7 +27,7 @@ public class Main {
 		if(gd.isFullScreenSupported())
 			gd.setFullScreenWindow(frame);
 		
-		SpaceShip v = new SpaceShip(180, 550, 32, 32);
+		Player v = new Player(180, 550, 32, 32);
 		GamePanel gp = new GamePanel();
 		GameEngine engine = new GameEngine(gp, v);
 		frame.addKeyListener(engine);

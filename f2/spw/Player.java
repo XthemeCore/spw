@@ -3,13 +3,12 @@ package f2.spw;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-public class SpaceShip extends Sprite {
+public class Player extends LivingEntity {
 
 	int step = 8;
-	private boolean alive = true;
 	
-	public SpaceShip(int x, int y, int width, int height) {
-		super(x, y, width, height);		
+	public Player(int x, int y, int width, int height) {
+		super(x, y, width, height, 1, 4,"sprite.png");	
 	}
 
 	@Override
@@ -33,20 +32,12 @@ public class SpaceShip extends Sprite {
 		}
 		if(x < 0)
 			x = 0;
-		if(x > 384 - width)
-			x = 384 - width;
+		if(x > 400 - width)
+			x = 400 - width;
 		if(y < 0)
 			y = 0;
-		if(y > 612 - height)
-			y = 612 - height;
-	}
-
-	public boolean isAlive(){
-		return alive;
-	}
-
-	public void setAlive(boolean alive){
-		this.alive = alive;
+		if(y > 600 - height)
+			y = 600 - height;
 	}
 
 	public void setToOrigin(){

@@ -16,7 +16,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
-	private SpaceShip v;	
+	private Player v;	
 	
 	private Audio bgm;
 	private Audio shotSE;
@@ -34,7 +34,7 @@ public class GameEngine implements KeyListener, GameReporter{
 	private boolean[] keys = {false,false,false,false,false};
 	private boolean events[] = {true,false,false,false};
 	
-	public GameEngine(GamePanel gp, SpaceShip v) {
+	public GameEngine(GamePanel gp, Player v) {
 		this.gp = gp;
 		this.v = v;
 		bgm = new Audio("sample.mid");
@@ -60,7 +60,7 @@ public class GameEngine implements KeyListener, GameReporter{
 	}
 	
 	private void generateEnemy(){
-		Enemy e = new Enemy((int)(Math.random()*390), 30);
+		Enemy e = new Enemy((int)(Math.random()*360), 0);
 		gp.sprites.add(e);
 		enemies.add(e);
 	}
@@ -134,6 +134,7 @@ public class GameEngine implements KeyListener, GameReporter{
 			else{
 				for(Bullet b : bullets){
 					br = b.getRectangle();
+					e.scan(b);
 					if(br.intersects(er) && b.isAlive() && e.isAlive()){
 							explodeSE.start();
 							e.setAlive(false);
@@ -169,6 +170,8 @@ public class GameEngine implements KeyListener, GameReporter{
 			toTitle();
 		else if(events[1])
 			stageUp();
+		else if(events[2])
+			win();
 		else if(events[3])
 			pauseGame();
 		else{		

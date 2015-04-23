@@ -18,10 +18,6 @@ public abstract class Sprite {
 	BufferedImage image;
 	BufferedImage[] sprites;
 	
-	public Sprite(int x, int y, int width, int height) {
-		this(x,y,width,height,1,4,"sprite.png");
-	}
-
 	public Sprite(int x, int y, int width, int height,int row,int column,String src) {
 		this.x = x;
 		this.y = y;

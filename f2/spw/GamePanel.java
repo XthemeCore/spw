@@ -184,6 +184,6 @@ public class GamePanel extends JPanel {
 	@Override
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
-		g2d.drawImage(bi, null, (Main.screenWidth-gpanelWidth)/2, (Main.screenHeight-gpanelHeight)/2);
+		g2d.drawImage(bi, null, (Main.screenWidth - gpanelWidth)/2, (Main.screenHeight - gpanelHeight)/2);
 	}
 }
