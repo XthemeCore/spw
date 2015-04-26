@@ -15,7 +15,8 @@ public class GameEngine implements KeyListener, GameReporter{
 	GamePanel gp;
 		
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
-	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
+	private ArrayList<BulletPlayer> bulletsPlayer = new ArrayList<BulletPlayer>();
+	private ArrayList<BulletEnemy> bulletsEnemy = new ArrayList<BulletEnemy>();
 	private Player v;	
 	
 	private Audio bgm;
@@ -65,10 +66,16 @@ public class GameEngine implements KeyListener, GameReporter{
 		enemies.add(e);
 	}
 
-	private void generateBullet(){
-		Bullet b = new Bullet(v.x + (v.width/2) - 2, v.y);
-		gp.sprites.add(b);
-		bullets.add(b);
+	private void generateBulletPlayer(){
+		BulletPlayer bp = new BulletPlayer(v.x + (v.width/2) - 2, v.y);
+		gp.sprites.add(bp);
+		bulletsPlayer.add(bp);
+	}
+
+	private void generateBulletEnemy(LivingEntity n){
+		BulletEnemy be = new BulletEnemy(n.x + (n.width/2) - 2, n.y + 32);
+		gp.sprites.add(be);
+		bulletsEnemy.add(be);
 	}
 
 	private void keyCompare(){
@@ -83,7 +90,7 @@ public class GameEngine implements KeyListener, GameReporter{
 		if(keys[4])
 			if(c.getCount()%4 == 0){
 				shotSE.start();
-				generateBullet();
+				generateBulletPlayer();
 			}
 	}
 	
@@ -102,46 +109,71 @@ public class GameEngine implements KeyListener, GameReporter{
 		eventsProcess();
 		
 		Iterator<Enemy> e_iter = enemies.iterator();
-		Iterator<Bullet> b_iter = bullets.iterator();
+		Iterator<BulletPlayer> bp_iter = bulletsPlayer.iterator();
 		while(e_iter.hasNext()){
 			Enemy e = e_iter.next();
 			e.proceed();
+			e.scan(v);
+			if(e.isDetect())
+				if(c.getCount()%9 == 0){
+					shotSE.start();
+					generateBulletEnemy(e);
+				}
 			
 			if(!e.isAlive()){
 				e_iter.remove();
 				gp.sprites.remove(e);
 			}
 		}
-		while(b_iter.hasNext()){
-			Bullet b = b_iter.next();
-			b.proceed();
+		while(bp_iter.hasNext()){
+			BulletPlayer bp = bp_iter.next();
+			bp.proceed();
 		
-			if(!b.isAlive()){
-				b_iter.remove();
-				gp.sprites.remove(b);
+			if(!bp.isAlive()){
+				bp_iter.remove();
+				gp.sprites.remove(bp);
+			}
+		}		
+		Iterator<BulletEnemy>  be_iter = bulletsEnemy.iterator();
+		while(be_iter.hasNext()){
+			BulletEnemy be = be_iter.next();
+			be.proceed();
+		
+			if(!be.isAlive()){
+				be_iter.remove();
+				gp.sprites.remove(be);
 			}
 		}
 		
+		
 		Rectangle2D.Double vr = v.getRectangle();
 		Rectangle2D.Double er;
-		Rectangle2D.Double br;
+		Rectangle2D.Double bpr;
+		Rectangle2D.Double ber;
 		for(Enemy e : enemies){
-			er = e.getRectangle();
+			er = e.getRectangle();			
 			if(er.intersects(vr) && e.isAlive()){
 				die();
 				return;
 			}
 			else{
-				for(Bullet b : bullets){
-					br = b.getRectangle();
-					e.scan(b);
-					if(br.intersects(er) && b.isAlive() && e.isAlive()){
+				for(BulletPlayer bp : bulletsPlayer){
+					bpr = bp.getRectangle();
+					e.scan(bp);
+					if(bpr.intersects(er) && bp.isAlive() && e.isAlive()){
 							explodeSE.start();
 							e.setAlive(false);
-							b.setAlive(false);
+							bp.setAlive(false);
 							score+= 100 * Math.pow(2,stage - 1);
 					}
 				}
+			}
+		}
+		for(BulletEnemy be : bulletsEnemy){
+			ber = be.getRectangle();
+			if(ber.intersects(vr) && be.isAlive()){
+				die();
+				return;
 			}
 		}
 	}
@@ -195,6 +227,14 @@ public class GameEngine implements KeyListener, GameReporter{
 					e.setAlive(false);
 				}
 			}
+			Iterator<BulletEnemy> be_iter = bulletsEnemy.iterator();
+			while(be_iter.hasNext()){
+				BulletEnemy be = be_iter.next();
+			
+				if(be.isAlive()){
+					be.setAlive(false);
+				}
+			}
 
 			timer.stop();
 		
@@ -236,14 +276,24 @@ public class GameEngine implements KeyListener, GameReporter{
 				gp.sprites.remove(e);
 			}
 		}
-		Iterator<Bullet> b_iter = bullets.iterator();
-		while(b_iter.hasNext()){
-			Bullet b = b_iter.next();
-			b.proceed();
+		Iterator<BulletPlayer> bp_iter = bulletsPlayer.iterator();
+		while(bp_iter.hasNext()){
+			BulletPlayer bp = bp_iter.next();
+			bp.proceed();
 			
-			if(b.isAlive()){
-				b_iter.remove();
-				gp.sprites.remove(b);
+			if(bp.isAlive()){
+				bp_iter.remove();
+				gp.sprites.remove(bp);
+			}
+		}
+		Iterator<BulletEnemy> be_iter = bulletsEnemy.iterator();
+		while(be_iter.hasNext()){
+			BulletEnemy be = be_iter.next();
+			be.proceed();
+			
+			if(be.isAlive()){
+				be_iter.remove();
+				gp.sprites.remove(be);
 			}
 		}
 		v.setAlive(true);

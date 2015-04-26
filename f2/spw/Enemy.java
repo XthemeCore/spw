@@ -8,8 +8,10 @@ public class Enemy extends LivingEntity{
 	public static final int Y_TO_DIE = 600;
 	
 	private int step = 12;
-	private int scanY = 100;
+	private int scanY = 75;
 	private int scanX = 75;
+
+	private boolean detected = false;
 	
 	public Enemy(int x, int y) {
 		super(x, y, 32, 32, 1, 4, "sprite.png");		
@@ -31,24 +33,49 @@ public class Enemy extends LivingEntity{
 	}
 
 	public void scan(LivingEntity v){
-		if(v instanceof Bullet){
+		if(v instanceof BulletPlayer){
 			if(y - v.y >= 0 && y - v.y <= scanY){
-					if(x < v.x && x > step/2 && v.x - x <= scanX)
-						x-= step/2;
+					if(x < v.x && x > step/4 && v.x - x <= scanX)
+						x-= step/4;
 					else if(x < v.x && v.x - x <= scanX)
-						x+= step/2;
-					else if(x > v.x && x < 366 - step/2 && x - v.x <= scanX)
-						x+=step/2;
+						x+= step/4;
+					else if(x > v.x && x < 366 - step/4 && x - v.x <= scanX)
+						x+=step/4;
 					else if(x > v.x && x - v.x <= scanX)
-						x-=step/2;
+						x-=step/4;
 					else if(x == v.x) 
-						if(Math.random() < 0.5 && x < 366 - step/2)
-							x+= step/2;
+						if(Math.random() < 0.5 && x < 366 - step/4)
+							x+= step/4;
 						else if(x > 0)
-							x-= step/2;
+							x-= step/4;
 						else 
-							x+= step/2;
+							x+= step/4;
 			}
 		}
+		else if(v instanceof Player){
+			setDetect(false);
+			if(x < v.x && x > step/2 && v.x - x <= scanX){
+				if(Math.random() < 0.2)
+					x-= step/8;
+				else
+					setDetect(true);
+			}
+			else if(x > v.x && x < 366 - step/2 && x - v.x <= scanX){
+				if(Math.random() < 0.2)
+					x+= step/8;
+				else
+					setDetect(true);
+			}
+			else if(x == v.x)
+				setDetect(true);
+		}
+	}
+
+	public void setDetect(boolean detected){
+		this.detected = detected;
+	}
+
+	public boolean isDetect(){
+		return detected;
 	}
 }
