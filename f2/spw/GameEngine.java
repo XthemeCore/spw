@@ -153,7 +153,12 @@ public class GameEngine implements KeyListener, GameReporter{
 		for(Enemy e : enemies){
 			er = e.getRectangle();			
 			if(er.intersects(vr) && e.isAlive()){
-				die();
+				if(v.isAlive()){
+					v.health -= 5;
+					e.setAlive(false);
+				}
+				else
+					die();
 				return;
 			}
 			else{
@@ -172,7 +177,12 @@ public class GameEngine implements KeyListener, GameReporter{
 		for(BulletEnemy be : bulletsEnemy){
 			ber = be.getRectangle();
 			if(ber.intersects(vr) && be.isAlive()){
-				die();
+				if(v.isAlive()){
+					v.health -= 1;
+					be.setAlive(false);
+				}
+				else
+					die();
 				return;
 			}
 		}
@@ -372,6 +382,14 @@ public class GameEngine implements KeyListener, GameReporter{
 
 	public int getStage(){
 		return stage;
+	}
+
+	public int getMaxHealth(){
+		return v.maxHealth;
+	}
+
+	public int getHealth(){
+		return v.health;
 	}
 
 	private void scoreCompare(int stage,long stagescore){

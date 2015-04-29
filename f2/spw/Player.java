@@ -8,7 +8,9 @@ public class Player extends LivingEntity {
 	int step = 8;
 	
 	public Player(int x, int y, int width, int height) {
-		super(x, y, width, height, 1, 4,"sprite.png");	
+		super(x, y, width, height, 1, 4,"sprite.png");
+		maxHealth = 250;
+		health = maxHealth;
 	}
 
 	@Override

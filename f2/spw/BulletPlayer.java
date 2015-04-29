@@ -18,6 +18,7 @@ public class BulletPlayer extends BulletEntity{
 		g.drawImage(sprites[0], x, y, width , height, null);	
 	}
 
+	@Override
 	public void proceed(){
 		y -= step;
 		if(y < Y_TO_DIE){

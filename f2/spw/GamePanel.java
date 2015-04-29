@@ -17,6 +17,7 @@ public class GamePanel extends JPanel {
 	Graphics2D big;
 	ArrayList<Sprite> sprites = new ArrayList<Sprite>();
 
+	HealthBar hpbar = new HealthBar(15,30);
 	BufferedImage background;
 	private int bgOffsetY = 0;
 
@@ -63,7 +64,7 @@ public class GamePanel extends JPanel {
 				break;
 			case 5: drawGamePause(reporter);
 		}
-		
+
 		repaint();
 	}
 
@@ -76,6 +77,12 @@ public class GamePanel extends JPanel {
 		drawSprites();
 		big.drawString(String.format("Score: %08d", reporter.getScore()), 240, 20);
 		big.drawString(String.format("Stage %02d", reporter.getStage()), 10, 20);
+		drawStatus(reporter);
+	}
+
+	public void drawStatus(GameReporter reporter){
+		hpbar.updateOffset(reporter.getMaxHealth(),reporter.getHealth());		
+		hpbar.draw(big);
 	}
 
 	public void drawGameTitle(){

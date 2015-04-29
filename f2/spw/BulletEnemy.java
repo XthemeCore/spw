@@ -18,6 +18,7 @@ public class BulletEnemy extends BulletEntity{
 		g.drawImage(sprites[1], x, y, width , height, null);	
 	}
 
+	@Override
 	public void proceed(){
 		y += step;
 		if(y > Y_TO_DIE){
