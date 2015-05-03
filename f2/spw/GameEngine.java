@@ -15,25 +15,26 @@ public class GameEngine implements KeyListener, GameReporter{
 	GamePanel gp;
 		
 	private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
-	private ArrayList<BulletPlayer> bulletsPlayer = new ArrayList<BulletPlayer>();
-	private ArrayList<BulletEnemy> bulletsEnemy = new ArrayList<BulletEnemy>();
+	private ArrayList<BulletEntity> bullets = new ArrayList<BulletEntity>();
 	private Player v;	
 	
 	private Audio bgm;
 	private Audio shotSE;
 	private Audio explodeSE;
+	private Audio gameoverME;
+	
+	private double difficulty;
+
+	private ScoreRecord record;
 
 	private Timer timer;
 	Counter c;
 	private int maxTime = 50;
 	
-	private long score = 0;
-	private double difficulty;
-	private int stage;
 	public static int maxstage = 10;
 
 	private boolean[] keys = {false,false,false,false,false};
-	private boolean events[] = {true,false,false,false};
+	private boolean events[] = {true,false,false,false,false};
 	
 	public GameEngine(GamePanel gp, Player v) {
 		this.gp = gp;
@@ -41,8 +42,12 @@ public class GameEngine implements KeyListener, GameReporter{
 		bgm = new Audio("sample.mid");
 		shotSE = new Audio("gunshot.mid");
 		explodeSE = new Audio("explode.mid");
+		gameoverME = new Audio("gameover.mid");
 		
+		record = new ScoreRecord();
+
 		gp.sprites.add(v);
+		gp.input.addKeyListener(this);
 		
 		c = new Counter();
 		timer = new Timer(maxTime, new ActionListener() {
@@ -69,13 +74,13 @@ public class GameEngine implements KeyListener, GameReporter{
 	private void generateBulletPlayer(){
 		BulletPlayer bp = new BulletPlayer(v.x + (v.width/2) - 2, v.y);
 		gp.sprites.add(bp);
-		bulletsPlayer.add(bp);
+		bullets.add(bp);
 	}
 
 	private void generateBulletEnemy(LivingEntity n){
 		BulletEnemy be = new BulletEnemy(n.x + (n.width/2) - 2, n.y + 32);
 		gp.sprites.add(be);
-		bulletsEnemy.add(be);
+		bullets.add(be);
 	}
 
 	private void keyCompare(){
@@ -109,13 +114,12 @@ public class GameEngine implements KeyListener, GameReporter{
 		eventsProcess();
 		
 		Iterator<Enemy> e_iter = enemies.iterator();
-		Iterator<BulletPlayer> bp_iter = bulletsPlayer.iterator();
 		while(e_iter.hasNext()){
 			Enemy e = e_iter.next();
 			e.proceed();
 			e.scan(v);
 			if(e.isDetect())
-				if(c.getCount()%9 == 0){
+				if(c.getCount()%12 == 0){
 					shotSE.start();
 					generateBulletEnemy(e);
 				}
@@ -125,36 +129,26 @@ public class GameEngine implements KeyListener, GameReporter{
 				gp.sprites.remove(e);
 			}
 		}
-		while(bp_iter.hasNext()){
-			BulletPlayer bp = bp_iter.next();
-			bp.proceed();
-		
-			if(!bp.isAlive()){
-				bp_iter.remove();
-				gp.sprites.remove(bp);
-			}
-		}		
-		Iterator<BulletEnemy>  be_iter = bulletsEnemy.iterator();
-		while(be_iter.hasNext()){
-			BulletEnemy be = be_iter.next();
-			be.proceed();
-		
-			if(!be.isAlive()){
-				be_iter.remove();
-				gp.sprites.remove(be);
+		Iterator<BulletEntity> b_iter = bullets.iterator();
+		while(b_iter.hasNext()){
+			
+			BulletEntity b  = b_iter.next();
+			b.proceed();
+			if(!b.isAlive()){
+				b_iter.remove();
+				gp.sprites.remove(b);
 			}
 		}
 		
 		
 		Rectangle2D.Double vr = v.getRectangle();
 		Rectangle2D.Double er;
-		Rectangle2D.Double bpr;
-		Rectangle2D.Double ber;
+		Rectangle2D.Double br;
 		for(Enemy e : enemies){
 			er = e.getRectangle();			
 			if(er.intersects(vr) && e.isAlive()){
 				if(v.isAlive()){
-					v.health -= 5;
+					v.health -= 10;
 					e.setAlive(false);
 				}
 				else
@@ -162,38 +156,39 @@ public class GameEngine implements KeyListener, GameReporter{
 				return;
 			}
 			else{
-				for(BulletPlayer bp : bulletsPlayer){
-					bpr = bp.getRectangle();
-					e.scan(bp);
-					if(bpr.intersects(er) && bp.isAlive() && e.isAlive()){
+				for(BulletEntity b : bullets){
+					br = b.getRectangle();
+					if(b instanceof BulletPlayer){
+						e.scan(b);
+						if(br.intersects(er) && b.isAlive() && e.isAlive()){
 							explodeSE.start();
 							e.setAlive(false);
-							bp.setAlive(false);
-							score+= 100 * Math.pow(2,stage - 1);
+							b.setAlive(false);
+							v.score+= 100 * Math.pow(2,v.stage - 1); 
+						}
+					}else if(b instanceof BulletEnemy){
+						if(br.intersects(vr) && b.isAlive()){
+							if(v.isAlive()){
+								v.health -= 1;
+								b.setAlive(false);
+							}
+							else
+								die();
+							return;
+						}
 					}
 				}
 			}
 		}
-		for(BulletEnemy be : bulletsEnemy){
-			ber = be.getRectangle();
-			if(ber.intersects(vr) && be.isAlive()){
-				if(v.isAlive()){
-					v.health -= 1;
-					be.setAlive(false);
-				}
-				else
-					die();
-				return;
-			}
-		}
 	}
+	
 
 	private void scoreProcess(){
-		if(score >= 99999999){
+		if(v.score >= 99999999){
 			events[2] = true;
 		}
 		else {
-			switch(stage){
+			switch(v.stage){
 				case 1:	scoreCompare(1,1000);
 				case 2:	scoreCompare(2,5000);
 				case 3:	scoreCompare(3,10000);
@@ -224,10 +219,10 @@ public class GameEngine implements KeyListener, GameReporter{
 	}
 
 	private void stageUp(){
-			if(stage > 0)
+			if(v.stage > 0)
 				bgm.pause();
-			if(stage < maxstage)
-				setStage(++stage);
+			if(v.stage < maxstage)
+				setStage(++v.stage);
 
 			Iterator<Enemy> e_iter = enemies.iterator();
 			while(e_iter.hasNext()){
@@ -237,12 +232,12 @@ public class GameEngine implements KeyListener, GameReporter{
 					e.setAlive(false);
 				}
 			}
-			Iterator<BulletEnemy> be_iter = bulletsEnemy.iterator();
-			while(be_iter.hasNext()){
-				BulletEnemy be = be_iter.next();
+			Iterator<BulletEntity> b_iter = bullets.iterator();
+			while(b_iter.hasNext()){
+				BulletEntity b = b_iter.next();
 			
-				if(be.isAlive()){
-					be.setAlive(false);
+				if(b.isAlive()){
+					b.setAlive(false);
 				}
 			}
 
@@ -276,34 +271,22 @@ public class GameEngine implements KeyListener, GameReporter{
 	private void clearGame(){
 		if(events[2])
 			events[2] = false;
+		else if(events[4])
+			events[4] = false;
 		Iterator<Enemy> e_iter = enemies.iterator();
 		while(e_iter.hasNext()){
-			Enemy e = e_iter.next();
-			e.proceed();
-			
+			Enemy e = e_iter.next();			
 			if(e.isAlive() || e.y < e.Y_TO_DIE){
 				e_iter.remove();
 				gp.sprites.remove(e);
 			}
 		}
-		Iterator<BulletPlayer> bp_iter = bulletsPlayer.iterator();
-		while(bp_iter.hasNext()){
-			BulletPlayer bp = bp_iter.next();
-			bp.proceed();
-			
-			if(bp.isAlive()){
-				bp_iter.remove();
-				gp.sprites.remove(bp);
-			}
-		}
-		Iterator<BulletEnemy> be_iter = bulletsEnemy.iterator();
-		while(be_iter.hasNext()){
-			BulletEnemy be = be_iter.next();
-			be.proceed();
-			
-			if(be.isAlive()){
-				be_iter.remove();
-				gp.sprites.remove(be);
+		Iterator<BulletEntity> b_iter = bullets.iterator();
+		while(b_iter.hasNext()){
+			BulletEntity b = b_iter.next();			
+			if(b.isAlive()){
+				b_iter.remove();
+				gp.sprites.remove(b);
 			}
 		}
 		v.setAlive(true);
@@ -317,7 +300,7 @@ public class GameEngine implements KeyListener, GameReporter{
 
 	private void resetGame(){
 		setStage(0);
-		score = 0;
+		v.score = 0;
 		events[1] = true;
 	}
 
@@ -327,13 +310,24 @@ public class GameEngine implements KeyListener, GameReporter{
 		timer.stop();
 	}
 
+	public void toRecord(){	
+		events[4] = true;
+		gp.updateGameUI(this,6);
+	}
+
 	private void win(){
 			Iterator<Enemy> e_iter = enemies.iterator();
 			while(e_iter.hasNext()){
-				Enemy e = e_iter.next();
-			
+				Enemy e = e_iter.next();			
 				if(e.isAlive()){
 					e.setAlive(false);
+				}
+			}
+			Iterator<BulletEntity> b_iter = bullets.iterator();
+			while(b_iter.hasNext()){
+				BulletEntity b = b_iter.next();			
+				if(b.isAlive()){
+					b.setAlive(false);
 				}
 			}
 
@@ -342,12 +336,15 @@ public class GameEngine implements KeyListener, GameReporter{
 	}
 	
 	public void die(){
+		bgm.pause();
+		gameoverME.start();
 		v.setAlive(false);
 		setStage(1);
 		timer.stop();
 
+		gp.input.setText(v.getName());
+		gp.input.requestFocusInWindow();
 		gp.updateGameUI(this,2);
-
 	}
 	
 	void controlVehicle(KeyEvent e) {
@@ -377,11 +374,11 @@ public class GameEngine implements KeyListener, GameReporter{
 	}
 
 	public long getScore(){
-		return score;
+		return v.score;
 	}
 
 	public int getStage(){
-		return stage;
+		return v.stage;
 	}
 
 	public int getMaxHealth(){
@@ -392,21 +389,27 @@ public class GameEngine implements KeyListener, GameReporter{
 		return v.health;
 	}
 
+	public ArrayList<PlayerRecord> getScoreRecord(){
+		return record.getRecord();
+	}
+
 	private void scoreCompare(int stage,long stagescore){
-		if(score >= stagescore){
+		if(v.score >= stagescore){
 			events[1] = true;
 		}
 	}
 
 	private void setStage(int stage){
-		this.stage = stage;
-		difficulty = 0.1 * stage;
+		v.stage = stage;
+		difficulty = 0.1 * v.stage;
 	}
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if(timer.isRunning())
+		if(timer.isRunning()){
+			gp.input.setText("");
 			controlVehicle(e);
+		}
 		else if(e.getKeyCode() == KeyEvent.VK_ENTER){
 			if(events[0]){				
 				startGame();
@@ -415,10 +418,17 @@ public class GameEngine implements KeyListener, GameReporter{
 				continueGame();
 			}
 			else if(events[2]){				
+				toRecord();
+			}
+			else if(events[4]){				
 				clearGame();
 			}
-			else
-				clearGame();
+			else{
+				System.out.println(gp.input.getText());
+				v.setName(gp.input.getText());
+				record.addRecord(v);
+				toRecord();
+			}
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
 			System.exit(0);
@@ -447,6 +457,6 @@ public class GameEngine implements KeyListener, GameReporter{
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		//do nothing		
+		//do nothing
 	}
 }

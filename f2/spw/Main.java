@@ -19,6 +19,7 @@ public class Main {
 
 		JFrame frame = new JFrame("Space War");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//frame.setSize(400,600);
 		frame.setSize(screenWidth, screenHeight);
 		frame.getContentPane().setLayout(new BorderLayout());
 		frame.setUndecorated(true); 
@@ -26,7 +27,6 @@ public class Main {
 
 		if(gd.isFullScreenSupported())
 			gd.setFullScreenWindow(frame);
-		
 		Player v = new Player(180, 550, 32, 32);
 		GamePanel gp = new GamePanel();
 		GameEngine engine = new GameEngine(gp, v);

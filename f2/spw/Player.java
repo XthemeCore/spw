@@ -3,9 +3,13 @@ package f2.spw;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-public class Player extends LivingEntity {
+public class Player extends LivingEntity{
 
 	int step = 8;
+	private String name = "Alex";
+
+	protected long score = 0;
+	protected int stage;
 	
 	public Player(int x, int y, int width, int height) {
 		super(x, y, width, height, 1, 4,"sprite.png");
@@ -45,5 +49,13 @@ public class Player extends LivingEntity {
 	public void setToOrigin(){
 		x = 180;
 		y = 550;
+	}
+
+	public void setName(String name){
+		this.name = name;
+	}
+
+	public String getName(){
+		return name;
 	}
 }

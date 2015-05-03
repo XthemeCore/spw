@@ -2,8 +2,9 @@ package f2.spw;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.io.Serializable;
 
-public abstract class LivingEntity extends Sprite {
+public abstract class LivingEntity extends Sprite implements Serializable{
 
 	int maxHealth = 1;
 	int health;

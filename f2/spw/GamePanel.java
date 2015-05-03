@@ -8,6 +8,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.JPanel;
 
@@ -24,7 +25,10 @@ public class GamePanel extends JPanel {
 	private int gpanelWidth;
 	private int gpanelHeight;
 
+	TextInput input;
 	public GamePanel() {
+		input = new TextInput("Enter Your Name");
+		add(input);
 		try{
 			InputStream stream = getClass().getResourceAsStream("/f2/spw/Graphics/background.png");
             background = ImageIO.read(stream);
@@ -63,6 +67,9 @@ public class GamePanel extends JPanel {
 			case 4: drawGameFinish(reporter);
 				break;
 			case 5: drawGamePause(reporter);
+				break;
+			case 6: drawScoreRecord(reporter);
+				break;
 		}
 
 		repaint();
@@ -86,13 +93,14 @@ public class GamePanel extends JPanel {
 	}
 
 	public void drawGameTitle(){
+		input.setBounds(0,0,1,1);
 		big.setFont(big.getFont().deriveFont(48F)); 
 		big.drawString("SPACEWAR", 45, 240);										
 		big.setFont(big.getFont().deriveFont(18F)); 
 		big.drawString("Press [ENTER] to Start", 45, 430);
 		big.drawString("or Press [ESC] to Exit", 45, 450);
 		big.setFont(big.getFont().deriveFont(18F));
-		big.drawString("ASSIGNMENT EDITION", 45, 270);
+		big.drawString("ALPHA 0.2", 45, 270);
 		big.drawString("(C) XthemeCore (5610110364) , 2015", 45, 550);
 	}
 
@@ -114,7 +122,7 @@ public class GamePanel extends JPanel {
 		big.setFont(big.getFont().deriveFont(32F)); 
 		big.drawString("Good job!", 45, 240);										
 		big.setFont(big.getFont().deriveFont(18F)); 
-		big.drawString("Press [ENTER] to Restart", 45, 500);
+		big.drawString("Press [ENTER] to see Score", 45, 500);
 		big.drawString("or Press [ESC] to Exit", 45, 520);
 		big.setFont(big.getFont().deriveFont(18F));
 		big.drawString("You win the SpaceWar.", 45, 280);
@@ -123,16 +131,42 @@ public class GamePanel extends JPanel {
 	}
 
 	public void drawGameOver(GameReporter reporter){
+		input.setBounds(530,470,160,20);
 		drawSprites();
 		drawBar();
 		big.setFont(big.getFont().deriveFont(32F)); 
 		big.drawString("Game Over", 45, 240);										
-		big.setFont(big.getFont().deriveFont(18F)); 
-		big.drawString("Press [ENTER] to Restart", 45, 500);
+		big.setFont(big.getFont().deriveFont(20F));
+		big.drawString("Enter Your Name:", 45, 390);
+		big.setFont(big.getFont().deriveFont(18F));
+		big.drawString("Press [ENTER] to see Score", 45, 500);
 		big.drawString("or Press [ESC] to Exit", 45, 520);
 		big.setFont(big.getFont().deriveFont(18F));
 		big.drawString("You lost the SpaceWar!", 45, 280);
 		big.drawString(String.format("Your score: %d", reporter.getScore()), 45, 310);
+	}
+
+	public void drawScoreRecord(GameReporter reporter){
+		input.setBounds(0,0,1,1);
+		drawSprites();
+		drawBar();
+		big.setFont(big.getFont().deriveFont(32F)); 
+		big.drawString("Top 5 Score", 45, 240);										
+		big.setFont(big.getFont().deriveFont(18F));
+		big.drawString("Name   Score", 45, 280);
+		int i = 0;
+		Iterator<PlayerRecord> r_iter = reporter.getScoreRecord().iterator();
+		while(r_iter.hasNext() && i < 5){
+			PlayerRecord r = r_iter.next();
+			big.drawString(String.format("%s %8d",
+				r.getName(),
+				r.score
+				), 45, 310 + 31*i);
+			i++;
+		}
+		big.setFont(big.getFont().deriveFont(18F));
+		big.drawString("Press [ENTER] to Restart", 45, 500);
+		big.drawString("or Press [ESC] to Exit", 45, 520);
 	}
 
 	public void drawStageUp(GameReporter reporter){
