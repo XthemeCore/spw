@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 public class Player extends LivingEntity{
 
 	int step = 8;
-	private String name = "Alex";
+	private String name = "";
 
 	protected long score = 0;
 	protected int stage;

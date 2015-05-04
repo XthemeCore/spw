@@ -27,7 +27,7 @@ public class GamePanel extends JPanel {
 
 	TextInput input;
 	public GamePanel() {
-		input = new TextInput("Enter Your Name");
+		input = new TextInput("");
 		add(input);
 		try{
 			InputStream stream = getClass().getResourceAsStream("/f2/spw/Graphics/background.png");
@@ -100,7 +100,7 @@ public class GamePanel extends JPanel {
 		big.drawString("Press [ENTER] to Start", 45, 430);
 		big.drawString("or Press [ESC] to Exit", 45, 450);
 		big.setFont(big.getFont().deriveFont(18F));
-		big.drawString("ALPHA 0.2", 45, 270);
+		big.drawString("COMPLETE ALPHA", 45, 270);
 		big.drawString("(C) XthemeCore (5610110364) , 2015", 45, 550);
 	}
 
