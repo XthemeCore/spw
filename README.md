@@ -10,11 +10,11 @@ SPW is a space-shooting game. It's come with simple function. Player can save hi
 
 # License
 
-Game Resources
+## Game Resources
 Attribution 4.0 International (CC BY 4.0)
 https://creativecommons.org/licenses/by/4.0/
 
-Source Code
+## Source Code
 MIT License
 
 # 5610110364
